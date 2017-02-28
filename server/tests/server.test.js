@@ -11,10 +11,15 @@ const todos = [{
   text: 'Second test todo'
 }];
 
+var todoId = '';
+
 beforeEach((done) => {
   Todo.remove({}).then(() => {
     return Todo.insertMany(todos);
-  }).then(() => done());
+  }).then((todos) => {
+    todoId = todos[0]._id;
+    done()
+  });
 });
 
 describe('POST todos', () => {
@@ -66,6 +71,19 @@ describe('GET /todos', () => {
       .expect(200)
       .expect((res) => {
         expect(res.body.todos.length).toBe(2);
+      })
+      .end(done);
+  });
+
+  it('should get one todo by id', (done) => {
+    request(app)
+      .get('/todos/' + todoId)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body).toInclude({
+          text: 'First test todo',
+          completed: false
+        });
       })
       .end(done);
   });
